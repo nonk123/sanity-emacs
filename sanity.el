@@ -34,11 +34,6 @@ Stolen from my GNU/Emacs init-file, which see.")
   :type 'file
   :group 'sanity)
 
-(defcustom sanity-autorun? t
-  "Run sanity automatically for supported projects?"
-  :type 'boolean
-  :group 'sanity)
-
 (defun sanity-buffer-name (project)
   "Derive a process-buffer name from PROJECT's name."
   (and project (concat "sanity: " (project-name project))))
@@ -91,8 +86,7 @@ its buffer if it is, before running again."
 ;;;###autoload
 (defun sanity-autorun ()
   "Run a sanity live-server for this project.  Used in `find-file-hook'."
-  (when-let* (sanity-autorun?
-              (project (project-current))
+  (when-let* ((project (project-current))
               ((null (sanity-maybe-get-buffer project)))
               (root (project-root project))
               (www (expand-file-name "www" root))
@@ -100,7 +94,13 @@ its buffer if it is, before running again."
     (when (catch 'user-error (sanity-run))
       (message "Sanity is running in the background!"))))
 
-(add-hook 'find-file-hook #'sanity-autorun)
+;;;###autoload
+(define-minor-mode sanity-mode
+  "Auto-run `sanity' after finding files inside supported projects."
+  :global t
+  :group 'sanity
+  (if sanity-mode (add-hook 'find-file-hook #'sanity-autorun)
+    (remove-hook 'find-file-hook #'sanity-autorun)))
 
 (provide 'sanity)
 
