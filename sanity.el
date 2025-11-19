@@ -15,14 +15,42 @@
 (require 'comint)
 (require 'project)
 
+(defgroup sanity nil "All things sanity."
+  :group 'tools
+  :group 'convenience
+  :link '(url-link :tag "GitHub" "https://github.com/nonk123/sanity-emacs"))
+
 (defconst sanity-windose? (and (string-match-p "AppData\\\\Roaming" (getenv "HOME")) t)
   "Evaluates to t if this GNU/Emacs is running under Windose.
 
 Stolen from my GNU/Emacs init-file, which see.")
 
-(defvar sanity-path
-  (expand-file-name (concat "sanity/sanity" (when sanity-windose? ".exe")) user-emacs-directory)
-  "Full path to sanity binary.")
+(defcustom sanity-path
+  (expand-file-name
+   (concat "sanity/sanity" (when sanity-windose? ".exe"))
+   user-emacs-directory)
+  "Full path to sanity binary."
+  :type 'file
+  :group 'sanity)
+
+(defcustom sanity-autorun? t
+  "Run sanity automatically for supported projects?"
+  :type 'boolean
+  :group 'sanity)
+
+(defun sanity-buffer-name (project)
+  "Derive a process-buffer name from PROJECT's name."
+  (and project (concat "sanity: " (project-name project))))
+
+(defun sanity-maybe-get-buffer (project)
+  "Return the PROJECT's sanity process-buffer, if any."
+  (when-let ((name (sanity-buffer-name project)))
+    (get-buffer name)))
+
+(defun sanity-get-buffer-create (project)
+  "Create a process-buffer for a valid PROJECT if one doesn't exist."
+  (when-let ((name (sanity-buffer-name project)))
+    (get-buffer-create name)))
 
 ;;;###autoload
 (defun sanity-install ()
@@ -47,19 +75,31 @@ its buffer if it is, before running again."
               (and (yes-or-no-p "Sanity binary couldn't be found.  Download it? ")
                    (sanity-install)))
     (user-error "Sanity binary can't be found"))
-  (if-let* ((project (project-current))
-            (buffer-name (concat "sanity: " (project-name project))))
-      (let ((buffer (get-buffer buffer-name)))
-        (when (buffer-live-p buffer)
-          (user-error "Sanity is already running in this project"))
-        (setq buffer (or buffer (get-buffer-create buffer-name)))
-        (with-current-buffer buffer
-          (ansi-color-for-comint-mode-on)
-          (comint-mode))
-        (let* ((default-directory (project-root project))
-               (process (start-process "sanity" buffer sanity-path "server")))
-          (set-process-filter process #'comint-output-filter)))
-    (user-error "You need to open a project to run sanity")))
+  (let* ((project (or (project-current) (user-error "You need to open a project to run sanity"))))
+    (when-let* ((buffer (sanity-maybe-get-buffer project))
+                ((buffer-live-p buffer)))
+      (user-error "Sanity is already running in this project"))
+    (with-current-buffer (sanity-get-buffer-create project)
+      (ansi-color-for-comint-mode-on)
+      (comint-mode)
+      (let* ((default-directory (project-root project))
+             (process (start-process "sanity" (current-buffer) sanity-path "server")))
+        (set-process-filter process #'comint-output-filter))
+      t)))
+
+;;;###autoload
+(defun sanity-autorun ()
+  "Run a sanity live-server for this project.  Used in `find-file-hook'."
+  (when-let* (sanity-autorun?
+              (project (project-current))
+              ((null (sanity-maybe-get-buffer project)))
+              (root (project-root project))
+              (www (expand-file-name "www" root))
+              ((and (file-exists-p www) (file-directory-p www))))
+    (when (catch 'user-error (sanity-run))
+      (message "Sanity is running in the background!"))))
+
+(add-hook 'find-file-hook #'sanity-autorun)
 
 (provide 'sanity)
 
