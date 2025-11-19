@@ -17,8 +17,8 @@ Automated installation with a different package-manager should be trivial to der
 
 Try the following commands, available for/at your convenience:
 
-- `M-x sanity-run` runs the live-server, prompting you to auto-install it if you don't have it.
-- `M-x sanity-install` auto-installs the live-server to `~/.emacs.d/sanity/sanity`. `.exe` extension is appended on Windose.
+- `M-x sanity-run`: runs the live-server, prompting to auto-install it if it's missing.
+- `M-x sanity-install`: auto-installs the live-server to `~/.emacs.d/sanity/sanity`. `.exe` extension is appended on Windose.
 
 Make sure to customize the following options:
 
