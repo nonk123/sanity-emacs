@@ -15,7 +15,8 @@
 (require 'comint)
 (require 'project)
 
-(defgroup sanity nil "All things sanity."
+(defgroup sanity nil
+  "All things sanity."
   :group 'tools
   :group 'convenience
   :link '(url-link :tag "GitHub" "https://github.com/nonk123/sanity-emacs"))
