@@ -19,3 +19,7 @@ Try the following commands, available for/at your convenience:
 
 - `M-x sanity-run` runs the live-server, prompting you to auto-install it if you don't have it.
 - `M-x sanity-install` auto-installs the live-server to `~/.emacs.d/sanity/sanity`. `.exe` extension is appended on Windose.
+
+Make sure to customize the following options:
+
+- `sanity-autorun?`: set to nil to prevent this package from auto-starting `sanity` inside projects that contain a `www` directory.
