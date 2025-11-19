@@ -31,6 +31,8 @@ Stolen from my GNU/Emacs init-file, which see.")
   (let* ((base "https://github.com/nonk123/sanity/releases/download/gh-actions/sanity-release-")
          (suffix (if sanity-windose? "windows.exe" "linux"))
          (url (concat base suffix)))
+    (when-let ((dir (file-name-directory sanity-path)))
+      (make-directory dir t))
     (url-copy-file url sanity-path t)
     (file-exists-p sanity-path)))
 
