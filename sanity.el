@@ -95,9 +95,9 @@ its buffer if it is, before running again."
   "Run a sanity live-server for this project.  Used in `find-file-hook'."
   (when-let* ((project (project-current))
               ((null (sanity-maybe-get-buffer project)))
-              ((sanity-project-eligible project)))
-    (when (catch 'user-error (sanity-run))
-      (message "Sanity is running in the background!"))))
+              ((sanity-project-eligible project))
+              ((catch 'user-error (sanity-run))))
+    (message "Sanity is running in the background!")))
 
 (defun sanity-mode-lighter ()
   "`sanity-mode' lighter."
