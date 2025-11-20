@@ -2,7 +2,7 @@
 
 ;; Author: nonk <me@nonk.dev>
 ;; Version: 0.1.0
-;; Keywords: sanity, live-server
+;; Keywords: tools, convenience
 ;; URL: https://github.com/nonk123/sanity
 
 ;;; Commentary:
