@@ -35,11 +35,11 @@ Stolen from my GNU/Emacs init-file, which see.")
   :group 'sanity)
 
 (defun sanity-buffer-name (project)
-  "Derive a process-buffer name from PROJECT's name."
+  "Derive a sanity buffer name from PROJECT's name."
   (and project (concat "sanity: " (project-name project))))
 
 (defun sanity-maybe-get-buffer (project)
-  "Return the PROJECT's sanity process-buffer, if any."
+  "Return the PROJECT's sanity buffer, if any."
   (when-let ((name (sanity-buffer-name project)))
     (get-buffer name)))
 
@@ -83,22 +83,36 @@ its buffer if it is, before running again."
         (set-process-filter process #'comint-output-filter))
       t)))
 
+(defun sanity-project-eligible (project)
+  "Return a non-nil value if PROJECT supports sanity."
+  (when-let* (project
+              (root (project-root project))
+              (www (expand-file-name "www" root)))
+    (and (file-exists-p www) (file-directory-p www))))
+
 ;;;###autoload
 (defun sanity-autorun ()
   "Run a sanity live-server for this project.  Used in `find-file-hook'."
   (when-let* ((project (project-current))
               ((null (sanity-maybe-get-buffer project)))
-              (root (project-root project))
-              (www (expand-file-name "www" root))
-              ((and (file-exists-p www) (file-directory-p www))))
+              ((sanity-project-eligible project)))
     (when (catch 'user-error (sanity-run))
       (message "Sanity is running in the background!"))))
+
+(defun sanity-mode-lighter ()
+  "`sanity-mode' lighter."
+  (if-let* ((project (project-current))
+            ((sanity-project-eligible project))
+            (status (if (sanity-maybe-get-buffer project) "running" "stopped")))
+      (concat "sanity[" status "]")
+    "sanity"))
 
 ;;;###autoload
 (define-minor-mode sanity-mode
   "Auto-run `sanity' after finding files inside supported projects."
   :global t
   :group 'sanity
+  :lighter (" " (:eval (sanity-mode-lighter)))
   (if sanity-mode (add-hook 'find-file-hook #'sanity-autorun)
     (remove-hook 'find-file-hook #'sanity-autorun)))
 
