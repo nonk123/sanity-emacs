@@ -44,7 +44,7 @@ Stolen from my GNU/Emacs init-file, which see.")
     (get-buffer name)))
 
 (defun sanity-get-buffer-create (project)
-  "Create a process-buffer for a valid PROJECT if one doesn't exist."
+  "Create a process buffer for a valid PROJECT if one doesn't exist."
   (when-let ((name (sanity-buffer-name project)))
     (get-buffer-create name)))
 
