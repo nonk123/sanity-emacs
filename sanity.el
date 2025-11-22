@@ -60,6 +60,10 @@ Stolen from my GNU/Emacs init-file, which see.")
     (url-copy-file url sanity-path t)
     (file-exists-p sanity-path)))
 
+(defun sanity--start-process (&rest args)
+  "Start and return a Sanity process called with ARGS."
+  (apply #'start-process "sanity" (current-buffer) sanity-path args))
+
 ;;;###autoload
 (defun sanity-run ()
   "Run a sanity live-server for this project.
@@ -80,7 +84,8 @@ its buffer if it is, before running again."
       (ansi-color-for-comint-mode-on)
       (comint-mode)
       (let* ((default-directory (project-root project))
-             (process (start-process "sanity" (current-buffer) sanity-path "server")))
+             (process (progn (sanity--start-process "lua-lib")
+                             (sanity--start-process "server"))))
         (set-process-filter process #'comint-output-filter))
       t)))
 
