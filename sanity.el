@@ -92,6 +92,16 @@ Auto-runs lua-lib for further convenience."
         (set-process-filter process #'comint-output-filter))
       t)))
 
+;;;###autoload
+(defun sanity-stop ()
+  "Stop sanity live-server if it's running."
+  (interactive)
+  (when-let* ((project (project-current))
+              (buffer (sanity-maybe-get-buffer project)))
+    (let ((kill-buffer-query-functions nil))
+      (kill-buffer buffer))
+    (message "Sanity stopped!")))
+
 (defun sanity-project-eligible (project)
   "Return a non-nil value if PROJECT supports sanity."
   (when-let* (project
