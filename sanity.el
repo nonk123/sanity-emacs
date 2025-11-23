@@ -36,17 +36,18 @@ Stolen from my GNU/Emacs init-file, which see.")
 
 (defun sanity-buffer-name (project)
   "Derive a sanity buffer name from PROJECT's name."
-  (and project (concat "sanity: " (project-name project))))
+  (when-let ((project-name (project-name project)))
+    (concat "sanity: " project-name)))
 
 (defun sanity-maybe-get-buffer (project)
   "Return the PROJECT's sanity buffer, if any."
-  (when-let ((name (sanity-buffer-name project)))
-    (get-buffer name)))
+  (when-let ((buffer-name (sanity-buffer-name project)))
+    (get-buffer buffer-name)))
 
 (defun sanity-get-buffer-create (project)
   "Create a process buffer for a valid PROJECT if one doesn't exist."
-  (when-let ((name (sanity-buffer-name project)))
-    (get-buffer-create name)))
+  (when-let ((buffer-name (sanity-buffer-name project)))
+    (get-buffer-create buffer-name)))
 
 ;;;###autoload
 (defun sanity-install ()
@@ -61,7 +62,7 @@ Stolen from my GNU/Emacs init-file, which see.")
     (file-exists-p sanity-path)))
 
 (defun sanity--start-process (&rest args)
-  "Start and return a Sanity process called with ARGS."
+  "Start and return a Sanity process invoked with ARGS."
   (apply #'start-process "sanity" (current-buffer) sanity-path args))
 
 ;;;###autoload
@@ -69,7 +70,9 @@ Stolen from my GNU/Emacs init-file, which see.")
   "Run a sanity live-server for this project.
 
 Signals a user-error if sanity is already running.  Make sure to kill
-its buffer if it is, before running again."
+its buffer if it is, before running again.
+
+Auto-runs lua-lib for further convenience."
   (interactive)
   (unless (or (file-exists-p sanity-path)
               (and (yes-or-no-p "Sanity binary couldn't be found.  Download it? ")
