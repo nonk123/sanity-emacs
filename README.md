@@ -22,6 +22,7 @@ Make sure to customize the following variables:
 
 Then try the following commands, available for/at your convenience:
 
-- `M-x sanity-run`: manually runs the live-server, prompting to auto-install it if it's missing.
-- `M-x sanity-install`: auto-installs the live-server to `~/.emacs.d/sanity/sanity`. `.exe` extension is appended on Windose.
+- `M-x sanity-install`: auto-install the live-server to `~/.emacs.d/sanity/sanity`. `.exe` extension is appended on Windose.
 - `M-x sanity-mode`: toggle `sanity-mode`, which auto-starts `sanity` inside supported projects.
+- `M-x sanity-run`: manually run the live-server, prompting to auto-install it if it's missing.
+- `M-x sanity-stop`: stop the live-server. More convenient to call this than to kill the process-buffer manually.
