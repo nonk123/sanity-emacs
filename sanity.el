@@ -108,12 +108,13 @@ Auto-runs lua-lib for further convenience."
               ((catch 'user-error (sanity-run))))
     (message "Sanity is running in the background!")))
 
-(defun sanity-mode-lighter ()
+(defun sanity-lighter ()
   "`sanity-mode' lighter."
   (if-let* ((project (project-current))
-            ((sanity-project-eligible project))
-            (status (if (sanity-maybe-get-buffer project) "running" "stopped")))
-      (concat "sanity[" status "]")
+            ((sanity-project-eligible project)))
+      (let* ((stopped (null (sanity-maybe-get-buffer project)))
+             (status (if stopped "stopped" "running")))
+        (propertize (concat "sanity[" status "]") 'face (if stopped 'error 'success)))
     "sanity"))
 
 ;;;###autoload
@@ -121,7 +122,7 @@ Auto-runs lua-lib for further convenience."
   "Auto-run `sanity' after finding files inside supported projects."
   :global t
   :group 'sanity
-  :lighter (" " (:eval (sanity-mode-lighter)))
+  :lighter (" " (:eval (sanity-lighter)))
   (if sanity-mode (add-hook 'find-file-hook #'sanity-autorun)
     (remove-hook 'find-file-hook #'sanity-autorun)))
 
